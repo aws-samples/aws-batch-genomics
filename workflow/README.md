@@ -18,4 +18,6 @@ aws cloudformation create-stack --stack-name genomics-workflow \
 
 Record the arn of the state machine that was created.
 
+N.B. In current version, error handling with Step Functions is not built in. TBD in later commit.
+
 For information about AWS Step Functions, see https://aws.amazon.com/step-functions/.
