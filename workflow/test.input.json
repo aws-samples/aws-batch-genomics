@@ -16,7 +16,7 @@
   },
   "strelka": {
     "jobDefinition": "strelka-myenv:1",
-    "jobQueue": "arn:aws:batch:us-east-1:<account-id>:job-queue/highPriority-myenv"
+    "jobQueue": "arn:aws:batch:us-east-1:<account-id>:job-queue/highPriority-myenv",
     "cmdArgs": " --exome "
   },
   "snpEff": {
