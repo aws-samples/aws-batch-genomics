@@ -23,7 +23,7 @@ To ensure that you are logged into your Amazon ECR repos, type `eval $(aws ecr g
 Each individual application used in the tutorial has been packaged as a Docker container. The Docker container packaging methodology is described in Part 2 of the tutorial.  We have provided a `Makefile` to build all of the necessary Docker images for this demonstration project, as well as deploy each container to a AWS EC2 Container Registry (ECR). Below is an example for building and deploying the Docker container image for Isaac.
 
 ```bash
-# From the root of the repository direct
+# From the root of the repository directory
 cd tools/isaac/docker
 
 # Create a ECR repository for Isaac, then copy the `repositoryUri` into a variable
