@@ -20,8 +20,7 @@ To ensure that you are logged into your Amazon ECR repos, type `eval $(aws ecr g
 
 ## Step 2. Building Docker images for applications
 
-Each individual application used in the tutorial has been packaged as a Docker container. The Docker container packaging methodology is described in Part 2 of the tutorial.  We have provided a `Makefile` to build all of the necessary Docker images for this demonstration project, as well as deploy each container to a AWS EC2 Container Registry (ECR). Below is an example for building and deploying the Docker container image for Isaac.
-
+Each individual application used in the tutorial has been packaged as a Docker container. The Docker container packaging methodology is described in Part 2 of the tutorial. We have provided a Makefile to build all of the necessary Docker images for this demonstration project, as well as deploy each container to a AWS EC2 Container Registry (ECR). Below is an example to enable you to build and deploy the Docker container image for Isaac.  Prior to installing Isaac please review the license [here](https://github.com/Illumina/Isaac3/blob/master/COPYRIGHT) and verify it is acceptable to you for your use.
 ```bash
 # From the root of the repository direct
 cd tools/isaac/docker
@@ -40,7 +39,7 @@ REPO_URI=$(aws ecr describe-repositories \
 make REGISTRY=$(REPO_URI)
 ```
 
-Repeat the above for SAMtools, Strelka, and SNPEff.
+Repeat the above for SAMtools (license [here](https://github.com/samtools/htslib/blob/develop/LICENSE)), Strelka (license [here](https://github.com/Illumina/strelka/blob/master/LICENSE.txt)), and SnpEff (license is LGPLv3, as referenced [here](http://snpeff.sourceforge.net/download.html)).
 
 ## Step 3. Setting up AWS Batch for an analysis environment
 
