@@ -2,7 +2,7 @@
 
 ## A tutorial on how to package and deploy a bioinformatics workflow on AWS using AWS Batch
 
-This tutorial will cover the material presented within the "Genomics Workflows on AWS" blog post series ([Part 1](https://aws.amazon.com/blogs/compute/building-high-throughput-genomics-batch-workflows-on-aws-introduction-part-1-of-4/), [Part 2](https://aws.amazon.com/blogs/compute/building-high-throughput-genomics-batch-workflows-on-aws-job-layer-part-2-of-4/), Part 3, Part 4) that covers the basics of bootstrapping a bioinformatics analysis pipeline on AWS. We break down the tutorial roughly as follows:
+This tutorial will cover the material presented within the "Genomics Workflows on AWS" blog post series ([Part 1](https://aws.amazon.com/blogs/compute/building-high-throughput-genomics-batch-workflows-on-aws-introduction-part-1-of-4/), [Part 2](https://aws.amazon.com/blogs/compute/building-high-throughput-genomics-batch-workflows-on-aws-job-layer-part-2-of-4/), [Part 3](https://aws.amazon.com/blogs/compute/building-high-throughput-genomic-batch-workflows-on-aws-batch-layer-part-3-of-4/), Part 4) that covers the basics of bootstrapping a bioinformatics analysis pipeline on AWS. We break down the tutorial roughly as follows:
 
 1. Setting up your AWS account (if you do not already have one)
 2. Package a set of bioinformatics applications using Docker
