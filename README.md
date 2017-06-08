@@ -1,8 +1,8 @@
 # Genomics Research on AWS
 
-## A tutorial on how to package and deploy a bioinformatics  workflow on AWS using AWS Batch
+## A tutorial on how to package and deploy a bioinformatics workflow on AWS using AWS Batch
 
-This tutorial will cover the material presented within the "Genomics Workflows on AWS"  blog post series that covers the basics of bootstrappign a bioinformatics analysis pipeline on AWS. We break down the tutorial roughly as follows:
+This tutorial will cover the material presented within the "Genomics Workflows on AWS" blog post series ([Part 1](https://aws.amazon.com/blogs/compute/building-high-throughput-genomics-batch-workflows-on-aws-introduction-part-1-of-4/), [Part 2](https://aws.amazon.com/blogs/compute/building-high-throughput-genomics-batch-workflows-on-aws-job-layer-part-2-of-4/), [Part 3](https://aws.amazon.com/blogs/compute/building-high-throughput-genomic-batch-workflows-on-aws-batch-layer-part-3-of-4/), [Part 4](https://aws.amazon.com/blogs/compute/building-high-throughput-genomics-batch-workflows-on-aws-workflow-layer-part-4-of-4/)) that covers the basics of bootstrapping a bioinformatics analysis pipeline on AWS. We break down the tutorial roughly as follows:
 
 1. Setting up your AWS account (if you do not already have one)
 2. Package a set of bioinformatics applications using Docker
@@ -21,6 +21,7 @@ To ensure that you are logged into your Amazon ECR repos, type `eval $(aws ecr g
 ## Step 2. Building Docker images for applications
 
 Each individual application used in the tutorial has been packaged as a Docker container. The Docker container packaging methodology is described in Part 2 of the tutorial. We have provided a Makefile to build all of the necessary Docker images for this demonstration project, as well as deploy each container to a AWS EC2 Container Registry (ECR). Below is an example to enable you to build and deploy the Docker container image for Isaac.  Prior to installing Isaac please review the license [here](https://github.com/Illumina/Isaac3/blob/master/COPYRIGHT) and verify it is acceptable to you for your use.
+
 ```bash
 # From the root of the repository directory
 cd tools/isaac/docker
