@@ -33,7 +33,7 @@ REPO_URI=$(aws ecr create-repository --repository-name isaac \
 # If the repository already exists, then
 # query ECR for the `repositoryUri`
 REPO_URI=$(aws ecr describe-repositories \
-  --repository-names snap \
+  --repository-names isaac \
   --output text --query "repositories[0].repositoryUri")
 
 # execute the build supplying the repositoryUri
