@@ -98,11 +98,11 @@ cd tools/samtools_stats/docker
 # NOTE: The --no-include-email flag is only needed for docker version >17.06
 eval $(aws ecr get-login --no-include-email)
 
-# Create a ECR repository for Isaac, then copy the `repositoryUri` into a variable
+# Create a ECR repository for samtools_stats image, then copy the `repositoryUri` into a variable
 REPO_URI=$(aws ecr create-repository --repository-name samtools_stats \
   --output text --query "repository.repositoryUri")
 
-# NOTE: If the 'isaac' repository already exists, then query ECR for the `repositoryUri` instead like so:
+# NOTE: If the 'samtools_stats' repository already exists, then query ECR for the `repositoryUri` instead like so:
 REPO_URI=$(aws ecr describe-repositories \
   --repository-names samtools_stats \
   --output text --query "repositories[0].repositoryUri")
@@ -124,28 +124,3 @@ You will now need to accomplish the same build process for the other tools:
 * SnpEff (license is LGPLv3, as referenced [here](http://snpeff.sourceforge.net/download.html)).
 
 As above, make sure to note down the `repositoryUri` of each tool for use in later steps.
-
-## PROTIP: Make a smaller Isaac image
-
-The Isaac build process has the potential to create a very large image. To get a smaller image size you can can squash the image layers, you can export/import the image using docker like so:
-
-```sh
-# use the repositoryUri from the ECR repository for REPO_URI
-make build REGISTRY=${REPO_URI}
-docker run -d isaac:latest
-# command will return the SHA256 hash of the container which will look like:
-# 0343ffa66ef88a32b502b349aa1c8b2aefc90dec9f201b4bfcee61b551982131
-
-# copy enough of the hash to identify the container then export and import
-docker export 0343ffa66ef8 > isaac_squash.tar
-docker import isaac_squash.tar isaac:latest
-
-# write the other tags
-make tag REGISTRY=${REPO_URI}
-
-# push up to ECR
-make push REGISTRY=${REPO_URI}
-
-# optional: clean up after yourself
-rm isaac_squash.tar
-```

@@ -19,7 +19,7 @@ RUN apt-get -y update && \
 RUN pip install boto3 awscli
 
 # Application installation
-RUN wget -O /samtools-1.4.tar.bz2 \
+RUN wget -O /samtools-1.5.tar.bz2 \
   https://github.com/samtools/samtools/releases/download/1.5/samtools-1.5.tar.bz2 && \
   tar xvjf /samtools-1.5.tar.bz2 && rm /samtools-1.5.tar.bz2
 
