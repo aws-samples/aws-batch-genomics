@@ -69,13 +69,9 @@ AWS Batch [has the same requirements for your AMI](https://docs.aws.amazon.com/b
 
 We will use the AWS Console to launch an instance and add the EBS volume like so:
 
-<button  onClick="openEcsAmiLaunchWindow()"> Launch ECS Optimized AMI </button>
-<script>
-function openEcsAmiLaunchWindow() {
-  var win = window.open('https://aws.amazon.com/marketplace/fulfillment?productId=52d5fd7f-92c7-4d60-a830-41a596f4d8f3&ref_=dtl_psb_continue&region=us-east-1','_blank');
-  win.focus();
-}
-</script>
+<b>
+<a href='https://aws.amazon.com/marketplace/fulfillment?productId=52d5fd7f-92c7-4d60-a830-41a596f4d8f3&ref_=dtl_psb_continue&region=us-east-1' target='_blank'>  [ Click here to launch ECS Optimized AMI ] </a>
+</b>
 
 ![Adding a EBS volume as `/dev/sdb`](https://d2908q01vomqb2.cloudfront.net/1b6453892473a467d07372d45eb05abc2031647a/2017/06/01/batch_ecs_setup.png)
 
