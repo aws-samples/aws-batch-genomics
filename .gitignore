@@ -1,4 +1,54 @@
+
+#********** osx template**********
+
 .DS_Store
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+
+#********** windows template**********
+
+# Windows image file caches
+Thumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+
+#********** emacs template**********
+
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+.elc
+auto-save-list
+tramp
+.\#*
+
+# Org-mode
+.org-id-locations
+*_archive
+
+
+#********** vim template**********
+
+.*.sw[a-z]
+*.un~
+Session.vim
+
+
+#********** other stuff **********
+scratch/
+
 .idea
 /.idea/markdown-navigator.xml
 /.idea/markdown-navigator/profiles_settings.xml
