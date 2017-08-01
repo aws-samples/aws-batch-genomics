@@ -10,7 +10,7 @@ LABEL software.documentation="https://github.com/Illumina/Isaac3/blob/master/src
 LABEL software.license="GPLv3"
 LABEL tags="Genomics"
 
-RUN apt-get -y update && \ 
+RUN apt-get -y update && \
     apt-get -y install zlib1g-dev gnuplot && \
     apt-get clean
 
@@ -19,11 +19,11 @@ RUN pip install boto3 awscli
 RUN git clone https://github.com/Illumina/Isaac3.git && cd /Isaac3 && git checkout 6f0191a4e0d4b332e8f34b7ced57dc6e6eb4f2f1
 RUN mkdir /iSAAC-build /isaac
 WORKDIR /iSAAC-build
-RUN /Isaac3/src/configure --prefix=/isaac
-RUN make
-RUN make install
-WORKDIR /
-RUN rm -rf /Isaac3 /iSAAC-build
+RUN /Isaac3/src/configure --prefix=/isaac && \
+ make && \
+ make install && \
+ cd / && \
+ rm -rf /Isaac3 /iSAAC-build
 
 RUN chmod -R +x /isaac/bin/
 
