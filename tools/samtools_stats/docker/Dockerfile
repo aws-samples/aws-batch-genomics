@@ -3,7 +3,7 @@ FROM python:2.7
 # Metadata
 LABEL container.base.image="python:2.7"
 LABEL software.name="SAMtools"
-LABEL software.version="1.4"
+LABEL software.version="1.5"
 LABEL software.description="Utilities for the Sequence Alignment/Map (SAM/BAM/CRAM) formats"
 LABEL software.website="http://www.htslib.org"
 LABEL software.documentation="http://www.htslib.org/doc/samtools.html"
@@ -20,10 +20,10 @@ RUN pip install boto3 awscli
 
 # Application installation
 RUN wget -O /samtools-1.4.tar.bz2 \
-  https://github.com/samtools/samtools/releases/download/1.4/samtools-1.4.tar.bz2 && \
-  tar xvjf /samtools-1.4.tar.bz2 && rm /samtools-1.4.tar.bz2
+  https://github.com/samtools/samtools/releases/download/1.5/samtools-1.5.tar.bz2 && \
+  tar xvjf /samtools-1.5.tar.bz2 && rm /samtools-1.5.tar.bz2
 
-RUN cd /samtools-1.4 && make && make install
+RUN cd /samtools-1.5 && make && make install
 
 # Application entry point
 COPY samtools_stats/src/run_samtools_stats.py /run_samtools_stats.py

@@ -1,12 +1,15 @@
 NAME=samtools_stats
-TAG=1.3.1
+TAG=1.5
 
-all: build push
+all: build tag push
 
 build:
-	docker build -t $(NAME):$(TAG) -t $(NAME):latest -f Dockerfile ../..
+	docker build -t $(NAME):latest -f Dockerfile ../..
+
+tag:
+	docker tag $(NAME):latest $(NAME):$(TAG)
 	docker tag $(NAME):latest $(REGISTRY):latest
-	docker tag $(NAME):$(TAG) $(REGISTRY):$(TAG)
+	docker tag $(NAME):latest $(REGISTRY):$(TAG)
 
 push:
 	docker push $(REGISTRY):$(TAG)
