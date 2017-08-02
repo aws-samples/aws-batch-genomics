@@ -22,7 +22,7 @@ aws cloudformation create-stack --stack-name iam-batch --template-body file://ba
 You can view the status of the stack creation like so:
 
 ```shell
-aws cloudformation describe-stack --stack-name iam-batch
+aws cloudformation describe-stacks --stack-name iam-batch
 ```
 
 Once the `StackStatus` is `CREATE_COMPLETE` you should see the value of several IAM role ARNs.
