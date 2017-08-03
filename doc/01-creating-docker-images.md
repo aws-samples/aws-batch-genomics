@@ -1,4 +1,4 @@
-cd# Building Docker images for applications
+# Building Docker images for applications
 
 Each individual application used in the tutorial needs to be packaged as a Docker container. Container packaging methodology can vary widely, but for the purposes of this tutorial we will package a set of bioinformatics tools to achieve the following goals:
 

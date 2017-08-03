@@ -79,20 +79,30 @@ Once you have added the volume, SSH to the instance and issue the following comm
 
 ```shell
 sudo yum -y update
-sudo yum -y install parted
+sudo mkfs.ext4 /dev/xvdb
+sudo mkdir /docker_scratch
+sudo echo -e '/dev/xvdb\t/docker_scratch\text4\tdefaults\t0\t0' | sudo tee -a /etc/fstab
+sudo mount -a
+```
+
+These steps will result in a AMI that has a formatted scratch volume that is automatically mounted to `/docker_scratch` on the instance when it starts. The Batch `JobDefinitions` define a Docker volume to mount this location as `/scratch` on the containers, which the applications use as a scratch directory for batch processing.
+
+Next, **[create your new AMI using the web console](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami-ebs.html)**.
+
+Once the AMI is created, save the value of the AMI ID.
+
+**NOTE:** Some folks prefer to make a partition on the EBS volume prior to formatting with a filesystem. If so you would need to install the `parted` package before you make the primary partition and format it, like so:
+
+```shell
+sudo yum -y update
+sudo you install -y parted
 sudo parted /dev/xvdb mklabel gpt
 sudo parted /dev/xvdb mkpart primary 0% 100%
-sudo mkfs -t ext4 /dev/xvdb1
+sudo mkfs.ext4 /dev/xvdb1
 sudo mkdir /docker_scratch
 sudo echo -e '/dev/xvdb1\t/docker_scratch\text4\tdefaults\t0\t0' | sudo tee -a /etc/fstab
 sudo mount -a
 ```
-
-This auto-mounts your scratch volume to /docker_scratch, which is your scratch directory for batch processing.
-
-Next, **[create your new AMI and record the image ID](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami-ebs.html)**.
-
-Once the AMI is created, save the value of the AMI ID.
 
 ## Creating the AWS Batch compute environment.
 
@@ -103,7 +113,7 @@ To run the script, your will need to supply:
 * the ARNs from the previous step
 * A set of VPC Subnets for Batch to deploy resources to
 * A set of Security Groups for your S3 and Batch resources
-* The base URL for the ECR registries (e.g. for `repositoryUri` = `798375407761.dkr.ecr.us-east-1.amazonaws.com/samtools_stats` then `ECRREGISTRY=123456789012.dkr.ecr.us-east-1.amazonaws.com` )
+* The base URL for the ECR registries (e.g. for `repositoryUri` = `123456789012.dkr.ecr.us-east-1.amazonaws.com/samtools_stats` then `ECRREGISTRY=123456789012.dkr.ecr.us-east-1.amazonaws.com` )
 
 ```shell
 SERVICEROLE=arn:aws:iam::123456789012:role/iam-batch-awsBatchServiceRole-3T98GYE3WWU1
