@@ -7,7 +7,8 @@ We have provided a [CloudFormation template](../tools/workflow/deploy_state_mach
 ![CloudFormation console](https://d2908q01vomqb2.cloudfront.net/1b6453892473a467d07372d45eb05abc2031647a/2017/06/02/cfn_parameters.png )
 
 
-You could also opt to use the AWS CLI to create the Step Functions using the ARNs from the newly created Lambda function and use that information in your to deploy the CloudFormation stack for the workflow.
+You could also opt to use the AWS CLI to create the Step Functions using the ARNs from the newly created Lambda function and use that information in your to deploy the CloudFormation stack for the workflow. Honestly this is much easier in the console, so I would copy and paste the ARNs into the web form. But if CLI is your thing, then here is an example:
+
 
 ```shell
 aws cloudformation create-stack --stack-name genomics-workflow \
@@ -22,7 +23,7 @@ Where parameters are a space seperated set of strings of the form
 ParameterKey=SamtoolsStatsLambdaArn,ParameterValue=arn:aws:lambda:us-east-1:123456789012:function:batchSubmitSamtoolsStatsJob
 ```
 
-The set of template parameters are
+The set of template parameters that you will need to define are:
 
 ```json
 Parameters:

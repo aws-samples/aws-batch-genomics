@@ -79,6 +79,7 @@ Once you have added the volume, SSH to the instance and issue the following comm
 
 ```shell
 sudo yum -y update
+sudo yum -y install parted
 sudo parted /dev/xvdb mklabel gpt
 sudo parted /dev/xvdb mkpart primary 0% 100%
 sudo mkfs -t ext4 /dev/xvdb1
@@ -149,6 +150,6 @@ aws batch submit-job --job-name testisaac --job-queue highPriority-${ENV} --job-
             "--fastq2_s3_path", "s3://aws-batch-genomics-resources/fastq/SRR1919605_2.fastq.gz",
             "--reference_s3_path", "s3://aws-batch-genomics-resources/reference/isaac/",
             "--working_dir", "/scratch",
-			"—cmd_args", " --exome ",]
+			"—cmd_args", " --exome "]
 }'
 ```

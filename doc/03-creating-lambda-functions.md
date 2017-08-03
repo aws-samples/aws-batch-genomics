@@ -28,8 +28,8 @@ zip lambda_function.zip lambda_function.py
 aws lambda create-function --function-name batchSubmitSamtoolsStatsJob \
   --runtime python2.7 \
   --role "arn:aws:iam::123456789012:role/iam-batch-lambdaBatchExecutionRole-HD21E5IYV2WU" \
-  --handler lambda_function.lambda_handler
-  --zip-file fileb://./lambda_function.zip \
+  --handler lambda_function.lambda_handler \
+  --zip-file fileb://./lambda_function.zip 
 ```
 
 Now repeat for the other functions that are needed. If you forget to jot down the Lambda function ARNs you can query for them using the CLI
