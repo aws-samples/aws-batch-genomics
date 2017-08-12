@@ -50,7 +50,7 @@ First, you will want to set up all of your IAM policies and roles with the follo
 aws cloudformation create-stack --stack-name iam-batch --template-body file://batch/setup/iam.template.yaml --capabilities CAPABILITY_NAMED_IAM
 ```
 
-We have provided a python script to configure your batch environment. While you can also do this via the CLI, the script in `batch/setup/create_batch_env.py` will do this for you. Please see the README.md in `batch/setup` for additional information on how to run this set up script. Effectively, this script creates your compute environments, job queues, and then job definitions.
+We have provided a CloudFormation template as well as a python script (either/or) to configure your batch environment. While you can also do this via the CLI, the CloudFormation template at `batch/setup/batch_env.template.yaml` (recommended) or the python script at `batch/setup/create_batch_env.py` (if following the blog posts) will do this for you. Please see the README.md in `batch/setup` for additional information on how to run these.
 
 ## Step 4. Define and deploy AWS Step Functions to control the data processing steps
 
