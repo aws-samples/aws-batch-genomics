@@ -37,7 +37,7 @@ REPO_URI=$(aws ecr describe-repositories \
   --output text --query "repositories[0].repositoryUri")
 
 # execute the build supplying the repositoryUri
-make REGISTRY=$(REPO_URI)
+make REGISTRY=${REPO_URI}
 ```
 
 Repeat the above for SAMtools (license [here](https://github.com/samtools/htslib/blob/develop/LICENSE)), Strelka (license [here](https://github.com/Illumina/strelka/blob/master/LICENSE.txt)), and SnpEff (license is LGPLv3, as referenced [here](http://snpeff.sourceforge.net/download.html)).
