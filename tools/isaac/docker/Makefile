@@ -4,9 +4,7 @@ TAG=03.17.03.01
 all: build tag push
 
 build:
-	docker build -t $(NAME):latest -f Dockerfile ../..
-tag:
-	docker tag $(NAME):latest $(NAME):$(TAG)
+	docker build -t $(NAME):$(TAG) -t $(NAME):latest -f Dockerfile --build-arg VERSION=$(TAG) ../..
 	docker tag $(NAME):latest $(REGISTRY):latest
 	docker tag $(NAME):$(TAG) $(REGISTRY):$(TAG)
 

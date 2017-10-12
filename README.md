@@ -14,4 +14,4 @@ These posts cover the basics of bootstrapping a bioinformatics analysis pipeline
 3. [Create a AWS Batch environment for analysis](./doc/02-creating-batch-env.md)
 4. [Creating AWS Lambda Functions](./doc/03-creating-lambda-functions.md) for each application
 5. [Creating AWS  Step Functions](./doc/04-creating-step-functions.md) to control the data processing steps
-5. [Initiate a workflow](./doc/05-initiate-worflow.md)
+6. [Initiate a workflow](./doc/05-initiate-worflow.md)

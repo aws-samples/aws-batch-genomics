@@ -1,5 +1,5 @@
 NAME=samtools_stats
-TAG=1.5
+TAG=1.5-aws
 
 all: build tag push
 
