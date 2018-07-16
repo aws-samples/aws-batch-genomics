@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Angel Pizarro <pizarroa@amazon.com>">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Introduction and requirements - AWS for Genomics Workflows</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Introduction and requirements";
+    var mkdocs_page_input_path = "step-functions/intro-step-functions.md";
+    var mkdocs_page_url = "/step-functions/intro-step-functions/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> AWS for Genomics Workflows</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Setting up AWS Batch</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../aws-batch/configure-aws-batch-start/">Getting Started</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../aws-batch/create-custom-ami/">Creating a custom AMI</a>
+                </li>
+                <li class="">
+                    
+    <span class="caption-text">Configuring AWS Batch with CloudFormation</span>
+    <ul class="subnav">
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../aws-batch/configure-aws-batch-cfn/">Launch the CloudFormation stacks</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../aws-batch/notes-vpc/">Notes on Amazon VPC</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../aws-batch/notes-iam/">Notes on IAM Permissions</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Setting up a genomics workflow environment</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../genomics-workflows-intro/">Introduction</a>
+                </li>
+                <li class=" current">
+                    
+    <span class="caption-text">AWS Step Functions</span>
+    <ul class="subnav">
+                <li class="toctree-l3 current">
+                    
+    <a class="current" href="./">Introduction and requirements</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l4"><a href="#leveraging-aws-native-services-for-genomics-workflows">Leveraging AWS-native services for genomics workflows</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l5" href="#requirements-for-aws-batch-jobs">Requirements for AWS Batch Jobs</a></li>
+        
+            <li><a class="toctree-l5" href="#job-management-using-a-container">Job management using a container</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../create-batchjobrunner-container/">Creating a job management container</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../create-example-sfl-workflow/">An example workflow</a>
+                </li>
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../cromwell/cromwell-aws-batch/">Cromwell</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../nextflow/nextflow-aws-batch/">Nextflow</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">AWS for Genomics Workflows</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Setting up a genomics workflow environment &raquo;</li>
+        
+      
+        
+          <li>AWS Step Functions &raquo;</li>
+        
+      
+    
+    <li>Introduction and requirements</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/aws-samples/aws-batch-genomics/edit/master/docs/step-functions/intro-step-functions.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="leveraging-aws-native-services-for-genomics-workflows">Leveraging AWS-native services for genomics workflows</h1>
+<p>A system for defining and executing genomics workflows can be subdivided into three main service areas.</p>
+<ol>
+<li>Services for managing applications and data.</li>
+<li>Serivces for individual task execution.</li>
+<li>Orchastration services that manage the execution of processes and the flow of data between tasks.</li>
+</ol>
+<p>The following diagram illustrates a reference AWS architecture for these three service layers.</p>
+<p><img alt="AWS reference architecture for genomics" src="../images/aws-genomics-ref-arch.png" /></p>
+<p>For <strong>data</strong>, we leverage Amazon S3 as the source of truth. All input and output data are staged to/from S3 as part of the task. <strong>Applications</strong> are deployed as Docker containers, and Amazon Elastic Container Registry is used to hold our Docker container images.</p>
+<p>For <strong>task scheduling and execution</strong>, we rely on AWS Batch.</p>
+<p>For <strong>orchastration between tasks</strong>, the combination of <a href="https://aws.amazon.com/step-functions/">AWS Step Functions</a> and <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> provide a robust mechanism to orchastrate complex workflows by interacting directly with AWS Batch.</p>
+<p>In the next few sections, we will cover an example of how to impement a workflow system that leverages AWS Step Functions with AWS Lambda.</p>
+<h2 id="requirements-for-aws-batch-jobs">Requirements for AWS Batch Jobs</h2>
+<p>AWS Batch does not make assumptions on the structure and requirements that Jobs take with respect to inputs and outputs. Batch Jobs may take data streams, files, or only parameters as input, and produce the same variaty for output, inclusive of files, metadata changes, updates to databases, etc. The space is so varied, Batch assumes that each application handles their input/output requirements.</p>
+<p>A common pattern for bioinformatics, however, is that files such as images or genomic sequence data are the inputs to some process, and outputs of that process are also files. Many bioinformatics tools have also been developed to run in traditional Linux-based compute clusters with shared filesystems, and are not necessarily optimized for cloud computing. In all the set of common requirements are for genomics on AWS Batch are:</p>
+<h4 id="container-placement">Container placement</h4>
+<p>To make your workflow as flexible as possible, each job should run independently. As a result, you cannot necessarily guarantee that different jobs in the same overall workflow run on the same instance. Using S3 as the location to exchange data between containers enables you to decouple storage of your intermediate files from compute.</p>
+<h4 id="multitenancy">Multitenancy</h4>
+<p>Multiple container jobs may run concurrently on the same instance. In these situations, it’s essential that your job writes to a unique subdirectory.</p>
+<h4 id="cleanup">Cleanup</h4>
+<p>As your jobs complete and write the output back to S3, it is a good idea to delete the scratch data on your instance generated by that job. This allows you to optimize for cost by reusing EC2 instances if there are jobs remaining in the queue, rather than terminating the EC2 instances.</p>
+<h2 id="job-management-using-a-container">Job management using a container</h2>
+<p>Since these requirements are commonplace, other bioinformatics-focused workflow systems, such as <a href="../../nextflow/nextflow-aws-batch/">Nextflow</a>, have support for data staging, etc. For a system based on AWS Step Functions and AWS Lambda, we will leverage a Docker container to handle the data staging and multitenancy requirements. The container will launch the application of interest, such as SAMTools, as a sibling container process.</p>
+<p>Separating the application's container from the AWS Batch requirements of running an application allows for leveraging 3rd party tools easier, and also allows for management of the functionality of the workflow system to be independent from the application's runtime needs. The diagram below represents the interaction between AWS Batch, Amazon S3, the job management container (<code>BatchJobRunner</code>), and the application's container (<code>samtools</code>):</p>
+<p><img alt="AWS Batch, S3, BatchJobRunner, and job container interactions" src="../images/batch-job-runner-interaction-diagram.png" /></p>
+<p>As you can see, the job management container can handle the requirements for most bioinformatics applications. You can also extend this container beyond the basics to perform other functions, such as sending real-time resource utilization and other runtime information for the application to a central monitoring service.</p>
+<p>Next we cover how to build a basic job management container</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../create-batchjobrunner-container/" class="btn btn-neutral float-right" title="Creating a job management container">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../genomics-workflows-intro/" class="btn btn-neutral" title="Introduction"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>2018 Amazon Web Services</p>
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/aws-samples/aws-batch-genomics/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../../genomics-workflows-intro/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../create-batchjobrunner-container/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/require.js"></script>
+      <script src="../../search/search.js"></script>
+
+</body>
+</html>

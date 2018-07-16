@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="None">
+  <meta name="author" content="Angel Pizarro <pizarroa@amazon.com>">
+  <link rel="shortcut icon" href="./img/favicon.ico">
+  <title>Home - AWS for Genomics Workflows</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="./css/highlight.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Home";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = "/";
+  </script>
+  
+  <script src="./js/jquery-2.1.1.min.js"></script>
+  <script src="./js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="./js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> AWS for Genomics Workflows</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href=".">Home</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#large-scale-genomics-workflows-on-aws">Large scale genomics workflows on AWS</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#prerequisites">Prerequisites</a></li>
+        
+            <li><a class="toctree-l3" href="#setting-up-an-aws-environment-for-genomics">Setting up an AWS environment for genomics</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Setting up AWS Batch</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="aws-batch/configure-aws-batch-start/">Getting Started</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="aws-batch/create-custom-ami/">Creating a custom AMI</a>
+                </li>
+                <li class="">
+                    
+    <span class="caption-text">Configuring AWS Batch with CloudFormation</span>
+    <ul class="subnav">
+                <li class="toctree-l3">
+                    
+    <a class="" href="aws-batch/configure-aws-batch-cfn/">Launch the CloudFormation stacks</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="aws-batch/notes-vpc/">Notes on Amazon VPC</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="aws-batch/notes-iam/">Notes on IAM Permissions</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Setting up a genomics workflow environment</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="genomics-workflows-intro/">Introduction</a>
+                </li>
+                <li class="">
+                    
+    <span class="caption-text">AWS Step Functions</span>
+    <ul class="subnav">
+                <li class="toctree-l3">
+                    
+    <a class="" href="step-functions/intro-step-functions/">Introduction and requirements</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="step-functions/create-batchjobrunner-container/">Creating a job management container</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="step-functions/create-example-sfl-workflow/">An example workflow</a>
+                </li>
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="cromwell/cromwell-aws-batch/">Cromwell</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="nextflow/nextflow-aws-batch/">Nextflow</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">AWS for Genomics Workflows</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/aws-samples/aws-batch-genomics/edit/master/docs/index.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="large-scale-genomics-workflows-on-aws">Large scale genomics workflows on AWS</h1>
+<p>Welcome! This tutorial walks through how to set up <a href="http://aws.amazon.com">Amazon Web Services</a> (<a href="http://aws.amazon.com">AWS</a>) products, such as <a href="http://aws.amazon.com/s3">Amazon S3</a>, <a href="http://aws.amazon.com/batch">AWS Batch</a>, etc., for running large scale genomics analyses. A typical genomics workflow is represented by the diagram below:</p>
+<p><img alt="Typical genomics workflow" src="./images/genomics-workflow.png" /></p>
+<p>Specifically, we want to create a system that handles packaging applications, executing individual tasks, and orchastrating the data between tasks.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>We make a few assumptions on your experience:</p>
+<ol>
+<li>You are familiar with the Linux command line</li>
+<li>You can use SSH to log into a Linux server</li>
+<li>You have a working AWS account</li>
+<li>That account is able to create a <a href="https://aws.amazon.com/batch/">AWS Batch</a> environment.</li>
+</ol>
+<p>If you are completely new to AWS, we <strong>highly recommend</strong> going through the following two <a href="https://aws.amazon.com/getting-started/tutorials/">AWS 10-Minute Tutorials</a>.</p>
+<ol>
+<li><strong><a href="https://aws.amazon.com/getting-started/tutorials/launch-a-virtual-machine/">Launch a Linux Virtual Machine</a></strong> - A tutorial which walks users through the process of starting a host on AWS, and configuring your own computer to connect over SSH.</li>
+<li><strong><a href="https://aws.amazon.com/getting-started/tutorials/backup-to-s3-cli/">Batch upload files to the cloud</a></strong> - A tutorial on using the AWS Command Line Interface (CLI) to access Amazon S3.</li>
+</ol>
+<p>The above tutorials will demonstrate the basics of AWS, as well as set up your development machine for working with AWS.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>We <strong>strongly</strong> recommend following the <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">IAM Security Best Practices</a>for securing your root AWS account and IAM users.</p>
+</div>
+<h2 id="setting-up-an-aws-environment-for-genomics">Setting up an AWS environment for genomics</h2>
+<p>There are several services at AWS that can be used for genomics. In this tutorial, we focus on <a href="http://aws.amazon.com/batch">AWS Batch</a>. AWS Batch itself is built on top of other AWS services, such as <a href="https://aws.amazon.com/ec2">Amazon EC2</a> and <a href="https://aws.amazon.com/ec2">Amazon ECS</a>, and as such has a few requirements for escalated privileges to get started from scratch.</p>
+<p>For example, you will need to be able to create some <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html">IAM Roles</a>. AWS <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html">Identity and Access Management (IAM)</a>
+is a web service that helps you securely control access to AWS resources. You use IAM to control who is authenticated (signed in) and authorized (has permissions) to use resources.</p>
+<p>We have provided some <a href="https://aws.amazon.com/cloudformation/">CloudFormation</a> templates to make the initial environment setup less painful. We show how to use these in <a href="#step-2">step 2</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are using a institutional account, it is likely that it does not  have administrative privileges, such as the IAM  <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html"><code>AdministratorAccess</code> managed policy</a>.</p>
+<p>If this is the case, you will need to work with your account administrator to set up a AWS Batch environment for you. That means less work for you! Just point them at this guide, and hae them provide you with a <a href="https://docs.aws.amazon.com/batch/latest/userguide/job_queues.html">AWS Batch Job Queue ARN</a>, and a <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html">Amazon S3 Bucket</a> that you can write results to. Move on to <a href="#step-3">Step 3</a>.</p>
+</div>
+<p>Assuming that you have the proper permissions, you are ready for <a href="aws-batch/configure-aws-batch-start/">Setting up AWS Batch</a>.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="aws-batch/configure-aws-batch-start/" class="btn btn-neutral float-right" title="Getting Started">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>2018 Amazon Web Services</p>
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/aws-samples/aws-batch-genomics/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+        <span style="margin-left: 15px"><a href="aws-batch/configure-aws-batch-start/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="./js/theme.js"></script>
+      <script src="./search/require.js"></script>
+      <script src="./search/search.js"></script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 0.17.3
+Build Date UTC : 2018-07-16 14:16:35
+-->

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Angel Pizarro <pizarroa@amazon.com>">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Launch the CloudFormation stacks - AWS for Genomics Workflows</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Launch the CloudFormation stacks";
+    var mkdocs_page_input_path = "aws-batch/configure-aws-batch-cfn.md";
+    var mkdocs_page_url = "/aws-batch/configure-aws-batch-cfn/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> AWS for Genomics Workflows</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Setting up AWS Batch</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../configure-aws-batch-start/">Getting Started</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../create-custom-ami/">Creating a custom AMI</a>
+                </li>
+                <li class=" current">
+                    
+    <span class="caption-text">Configuring AWS Batch with CloudFormation</span>
+    <ul class="subnav">
+                <li class="toctree-l3 current">
+                    
+    <a class="current" href="./">Launch the CloudFormation stacks</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l4"><a href="#launching-the-cloudformation-stacks">Launching the CloudFormation stacks</a></li>
+    
+
+    <li class="toctree-l4"><a href="#full-stack-guided-walk-through">Full Stack guided walk-through</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l5" href="#step-1-launch-the-template">Step 1. Launch the template</a></li>
+        
+            <li><a class="toctree-l5" href="#step-2-choose-a-good-name-for-the-stack">Step 2. Choose a good name for the stack</a></li>
+        
+            <li><a class="toctree-l5" href="#step-3-fill-out-the-parameters">Step 3. Fill out the parameters</a></li>
+        
+            <li><a class="toctree-l5" href="#step-4-take-a-break">Step 4. Take a break</a></li>
+        
+            <li><a class="toctree-l5" href="#step-5-get-the-aws-batch-job-queue">Step 5. Get the AWS Batch Job Queue</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../notes-vpc/">Notes on Amazon VPC</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../notes-iam/">Notes on IAM Permissions</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Setting up a genomics workflow environment</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../genomics-workflows-intro/">Introduction</a>
+                </li>
+                <li class="">
+                    
+    <span class="caption-text">AWS Step Functions</span>
+    <ul class="subnav">
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../step-functions/intro-step-functions/">Introduction and requirements</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../step-functions/create-batchjobrunner-container/">Creating a job management container</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../step-functions/create-example-sfl-workflow/">An example workflow</a>
+                </li>
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../cromwell/cromwell-aws-batch/">Cromwell</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../nextflow/nextflow-aws-batch/">Nextflow</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">AWS for Genomics Workflows</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Setting up AWS Batch &raquo;</li>
+        
+      
+        
+          <li>Configuring AWS Batch with CloudFormation &raquo;</li>
+        
+      
+    
+    <li>Launch the CloudFormation stacks</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/aws-samples/aws-batch-genomics/edit/master/docs/aws-batch/configure-aws-batch-cfn.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h2 id="launching-the-cloudformation-stacks">Launching the CloudFormation stacks</h2>
+<p>The links below provide a fully configured AWS environment for setting up AWS Batch for genomics workflows. In all cases, you will need the AMI ID for the AWS Batch Compute Resource AMI that you created using the <a href="../create-custom-ami">"Create a Custom AMI"</a> guide.</p>
+<!-- https://aws-quickstart.s3.amazonaws.com/quickstart-aws-vpc/templates/aws-vpc.template
+-->
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th align="center">Source</th>
+<th>Launch Stack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full Stack</td>
+<td>Launch a full AWS environment, including a new VPC across 2 Availability Zones, IAM policies and roles, Amazon S3 buckets for data and logging, and AWS Batch Job Queue and Compute Environments. <em>You must provide a custom AMI ID</em>.</td>
+<td align="center"><a href="https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-root.template.yaml"><i class="fa fa-eye"></i></a></td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=GenomicsWorkflow-VPC-IAM-Batch-S3&amp;templateURL=https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-root.template.yaml"><img alt="cloudformation-launch-button" src="../../images/cloudformation-launch-stack.png" /></a></td>
+</tr>
+<tr>
+<td>Existing VPC</td>
+<td>Create AWS Batch Job Queues and Compute Environments, a secure Amazon S3 bucket, and IAM policies and roles within an existing VPC. <em>You must provide custom AMI ID, VPC ID, and subnet IDs</em>.</td>
+<td align="center"><a href="https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-root-novpc.template.yaml"><i class="fa fa-eye"></i></a></td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=GenomicsWorkflow-IAM-Batch-S3&amp;templateURL=https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-root-novpc.template.yaml"><img alt="cloudformation-launch-button" src="../../images/cloudformation-launch-stack.png" /></a></td>
+</tr>
+</tbody>
+</table>
+<p>The individual components from above are available as stand-alone CloudFormation templates as well, in case you need to have another individual with elevated privileges to execute one of them. They are in order of dependency, and you will need to provide output values from one template to the dependent templates.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th align="center">Source</th>
+<th>Launch Stack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Amazon VPC</td>
+<td>The AWS reference VPC deployment from the <strong><a href="https://aws.amazon.com/quickstart/architecture/vpc/">Modular and Scalable VPC Architecure</a></strong> guide. Great for deploying genomics workflows to.</td>
+<td align="center"><a href="https://aws-quickstart.s3.amazonaws.com/quickstart-aws-vpc/templates/aws-vpc.template"><i class="fa fa-eye"></i></a></td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=GenomicsWorkflow-VPC&amp;templateURL=https://aws-quickstart.s3.amazonaws.com/quickstart-aws-vpc/templates/aws-vpc.template"><img alt="cloudformation-launch-button" src="../../images/cloudformation-launch-stack.png" /></a></td>
+</tr>
+<tr>
+<td>Amazon S3</td>
+<td>Creates a secure Amazon S3 bucket to read from and write results to.</td>
+<td align="center"><a href="https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-s3.template.yaml"><i class="fa fa-eye"></i></a></td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=GenomicsWorkflow-S3&amp;templateURL=https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-s3.template.yaml"><img alt="cloudformation-launch-button" src="../../images/cloudformation-launch-stack.png" /></a></td>
+</tr>
+<tr>
+<td>Amazon IAM</td>
+<td>Create the necessary IAM Roles. This is useful to hand to someone with the right permissions to create these on your behalf. <em>You will need to provide a S3 bucket name</em>.</td>
+<td align="center"><a href="https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-iam.template.yaml"><i class="fa fa-eye"></i></a></td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=GenomicsWorkflow-IAM&amp;templateURL=https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-batch.iam.yaml"><img alt="cloudformation-launch-button" src="../../images/cloudformation-launch-stack.png" /></a></td>
+</tr>
+<tr>
+<td>AWS Batch</td>
+<td>Creates AWS Batch Job Queues and Compute Environments. You will need to provide the details on IAM roles and instance profiles, and the IDs for a VPC and subnets.</td>
+<td align="center"><a href="https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-batch.template.yaml"><i class="fa fa-eye"></i></a></td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=GenomicsWorkflow-Batch&amp;templateURL=https://raw.githubusercontent.com/aws-samples/aws-batch-genomics/master/src/templates/aws-genomics-batch.template.yaml"><img alt="cloudformation-launch-button" src="../../images/cloudformation-launch-stack.png" /></a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="full-stack-guided-walk-through"><strong><code>Full Stack</code></strong> guided walk-through</h2>
+<p>Here we provide a walkthrough launching the <code>Full Stack</code> CloudFormation template.</p>
+<h3 id="step-1-launch-the-template">Step 1. Launch the template</h3>
+<h3 id="step-2-choose-a-good-name-for-the-stack">Step 2. Choose a good name for the stack</h3>
+<h3 id="step-3-fill-out-the-parameters">Step 3. Fill out the parameters</h3>
+<h3 id="step-4-take-a-break">Step 4. Take a break</h3>
+<h3 id="step-5-get-the-aws-batch-job-queue">Step 5. Get the AWS Batch Job Queue</h3>
+<p>Now that the CloudFormation stack is launched, note the output default AWS Batch Job Queue name and ARN. You will need these when configuring a workflow system, such as GenomicsWorkflow or Nextflow, to use AWS Batch as a backend for task distribution.</p>
+<p><img alt="AWS Batch Job Queue names and ARNs" src="../images/cfn-batch-jq-name-arn.png" /></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../notes-vpc/" class="btn btn-neutral float-right" title="Notes on Amazon VPC">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../create-custom-ami/" class="btn btn-neutral" title="Creating a custom AMI"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>2018 Amazon Web Services</p>
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/aws-samples/aws-batch-genomics/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../create-custom-ami/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../notes-vpc/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/require.js"></script>
+      <script src="../../search/search.js"></script>
+
+</body>
+</html>
