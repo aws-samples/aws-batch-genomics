@@ -10,7 +10,6 @@ This tutorial will cover the material presented within the "Genomics Workflows o
 4. Define and deploy AWS Step Functions to control the data processing steps
 5. Initiate a workflow
 
-
 ## Step 1. Set up an AWS account and the AWS Command Line Interface
 
 If you don't already have a AWS account, please follow the ["Backup Files to Amazon S3 using the AWS CLI"](https://aws.amazon.com/getting-started/tutorials/backup-to-s3-cli/) 10 minute tutorial to make sure you have a working AWS environment needed for this tutorial.
