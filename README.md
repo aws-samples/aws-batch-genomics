@@ -1,6 +1,6 @@
 # Genomics Research on AWS
 
-This project demonstrates how to run a large-scale, genomics secondary-analysis pipeline on [AWS](https://aws.amazon.com/) using [AWS Step Functions](https://aws.amazon.com/step-functions/) and [AWS Batch](https://aws.amazon.com/batch/).
+This project demonstrates how to run a large-scale, genomics secondary-analysis pipeline on [AWS](https://aws.amazon.com/) using [AWS Step Functions](https://aws.amazon.com/step-functions/) and [AWS Batch](https://aws.amazon.com/batch/).  You can learn more about how we used the new AWS Step Functions integration with AWS Batch in our blog post, [Building Simpler Genomics Workflows on AWS Step Functions](https://aws.amazon.com/blogs/compute/building-simpler-genomics-workflows-on-aws-step-functions/). 
 
 ![Standard Genomic Secondary-Analysis Workflow](https://docs.opendata.aws/genomics-workflows/images/genomics-workflow.png "Standard Genomic Secondary-Analysis Workflow")
 
