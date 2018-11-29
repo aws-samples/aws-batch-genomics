@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Setup State Machine
+
+Parameters:
+  RoleStackName:
+    Description: "Stack that deploys roles for genomic workflow"
+    Type: String
+
+Resources:
+  GenomicWorkflow:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      RoleArn:
+        Fn::ImportValue: !Sub "${RoleStackName}:StatesExecutionRole"
+      DefinitionString: !Sub |-
+        {
+           "Comment":"A simple example that submits a Job to AWS Batch",
+           "StartAt":"RunIsaacJob",
+           "States":{
+              "RunIsaacJob":{
+                 "Type":"Task",
+                 "Resource":"arn:aws:states:::batch:submitJob.sync",
+                 "Parameters":{
+                    "JobDefinition":"Isaac",
+                    "JobName.$":"$.isaac.JobName",
+                    "JobQueue":"HighPriority",
+                    "Parameters.$": "$.isaac"
+                 },
+                 "TimeoutSeconds": 1800,
+                 "HeartbeatSeconds": 60,
+                 "Next":"Parallel",
+                 "InputPath":"$",
+                 "ResultPath":"$.status",
+                 "Retry" : [
+                    {
+                      "ErrorEquals": [ "States.Timeout" ],
+                      "IntervalSeconds": 3,
+                      "MaxAttempts": 2,
+                      "BackoffRate": 1.5
+                    }
+                 ]
+              },
+              "Parallel":{
+                 "Type":"Parallel",
+                 "Next":"FinalState",
+                 "Branches":[
+                    {
+                       "StartAt":"RunStrelkaJob",
+                       "States":{
+                          "RunStrelkaJob":{
+                             "Type":"Task",
+                             "Resource":"arn:aws:states:::batch:submitJob.sync",
+                             "Parameters":{
+                                "JobDefinition":"Strelka",
+                                "JobName.$":"$.strelka.JobName",
+                                "JobQueue":"HighPriority",
+                                "Parameters.$": "$.strelka"
+                             },
+                             "TimeoutSeconds": 1800,
+                             "HeartbeatSeconds": 60,
+                             "Next":"RunSnpEffJob",
+                             "InputPath":"$",
+                             "ResultPath":"$.status",
+                             "Retry" : [
+                                {
+                                  "ErrorEquals": [ "States.Timeout" ],
+                                  "IntervalSeconds": 3,
+                                  "MaxAttempts": 2,
+                                  "BackoffRate": 1.5
+                                }
+                             ]
+                          },
+                          "RunSnpEffJob":{
+                             "Type":"Task",
+                             "Resource":"arn:aws:states:::batch:submitJob.sync",
+                             "Parameters":{
+                                "JobDefinition":"SNPEff",
+                                "JobName.$":"$.snpeff.JobName",
+                                "JobQueue":"HighPriority",
+                                "Parameters.$": "$.snpeff"
+                             },
+                             "TimeoutSeconds": 1800,
+                             "HeartbeatSeconds": 60,
+                             "Retry" : [
+                                {
+                                  "ErrorEquals": [ "States.Timeout" ],
+                                  "IntervalSeconds": 3,
+                                  "MaxAttempts": 2,
+                                  "BackoffRate": 1.5
+                                }
+                             ],
+                             "End":true
+                          }
+                       }
+                    },
+                    {
+                       "StartAt":"RunSamtoolsStatsJob",
+                       "States":{
+                          "RunSamtoolsStatsJob":{
+                             "Type":"Task",
+                             "Resource":"arn:aws:states:::batch:submitJob.sync",
+                             "Parameters":{
+                                "JobDefinition":"SamtoolsStats",
+                                "JobName.$":"$.samtools.JobName",
+                                "JobQueue":"HighPriority",
+                                "Parameters.$": "$.samtools"
+                             },
+                             "TimeoutSeconds": 1800,
+                             "HeartbeatSeconds": 60,
+                             "End":true,
+                             "Retry" : [
+                                {
+                                  "ErrorEquals": [ "States.Timeout" ],
+                                  "IntervalSeconds": 3,
+                                  "MaxAttempts": 2,
+                                  "BackoffRate": 1.5
+                                }
+                             ]
+                          }
+                       }
+                    }
+                 ]
+              },
+              "FinalState":{
+                 "Type":"Pass",
+                 "End":true
+              }
+           }
+        }
+
+Outputs:
+  GenomicsWorkflowArn:
+    Description: GenomicWorkflow ARN
+    Value: !Ref GenomicWorkflow
+  StackName:
+    Description: StackName
+    Value: !Sub ${AWS::StackName}

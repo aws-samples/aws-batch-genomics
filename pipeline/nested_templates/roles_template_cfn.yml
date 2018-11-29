@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Setup IAM Roles
+
+Resources:
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "ecs-tasks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+
+  ECSInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+      - "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleForSSM"
+
+  ECSInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+      - !Ref ECSInstanceRole
+      InstanceProfileName: !Ref ECSInstanceRole
+
+  SpotFleetRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "spotfleet.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetRole"
+
+  BatchServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "batch.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
+
+  StatesExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !Sub "states.${AWS::Region}.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/AWSBatchFullAccess"
+      - "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess"
+
+
+Outputs:
+  BatchServiceRole:
+    Description: BatchServiceRole
+    Value: !GetAtt BatchServiceRole.Arn
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", BatchServiceRole ] ]
+  SpotFleetRole:
+    Description: SpotFleetRole
+    Value: !GetAtt SpotFleetRole.Arn
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", SpotFleetRole ] ]
+  ECSInstanceRole:
+    Description: ECSInstanceRole
+    Value: !GetAtt ECSInstanceRole.Arn
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", ECSInstanceRole ] ]
+  ECSInstanceProfile:
+    Description: ECSInstanceProfile
+    Value: !GetAtt ECSInstanceProfile.Arn
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", ECSInstanceProfile ] ]
+  ECSTaskRole:
+    Description: ECSTaskRole
+    Value: !GetAtt ECSTaskRole.Arn
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", ECSTaskRole ] ]
+  StatesExecutionRole:
+    Description: StatesExecutionRole
+    Value: !GetAtt StatesExecutionRole.Arn
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", StatesExecutionRole ] ]
+  StackName:
+    Description: StackName
+    Value: !Sub ${AWS::StackName}

@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Setup Batch Job Definitions
+
+Parameters:
+  RoleStackName:
+    Description: "Stack that deploys roles for genomic workflow"
+    Type: String
+  JobResultsBucket:
+    Description: "Bucket that holds workflow job results"
+    Type: String
+  DefaultSampleName:
+    Description: "A default sample name for parameters"
+    Type: String
+    Default: "NA12878"
+
+Resources:
+  IsaacJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      JobDefinitionName: "Isaac"
+      Type: container
+      RetryStrategy:
+        Attempts: 1
+      Parameters:
+        BAMS3FolderPath: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/bam"
+        FastQ1S3Path: "s3://aws-batch-genomics-shared/secondary-analysis/example-files/fastq/SRR1919605_1.fastq.gz"
+        FastQ2S3Path: "s3://aws-batch-genomics-shared/secondary-analysis/example-files/fastq/SRR1919605_2.fastq.gz"
+        ReferenceS3Path: "s3://aws-batch-genomics-shared/secondary-analysis/reference/isaac/"
+        WorkingDir: "/scratch"
+      ContainerProperties:
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/isaac"
+        Vcpus: 32
+        Memory: 80000
+        JobRoleArn:
+          Fn::ImportValue: !Sub "${RoleStackName}:ECSTaskRole"
+        Command:
+          - "--bam_s3_folder_path"
+          - "Ref::BAMS3FolderPath"
+          - "--fastq1_s3_path"
+          - "Ref::FastQ1S3Path"
+          - "--fastq2_s3_path"
+          - "Ref::FastQ2S3Path"
+          - "--reference_s3_path"
+          - "Ref::ReferenceS3Path"
+          - "--working_dir"
+          - "Ref::WorkingDir"
+        MountPoints:
+          - ContainerPath: "/scratch"
+            ReadOnly: false
+            SourceVolume: docker_scratch
+        Volumes:
+          - Name: docker_scratch
+            Host:
+              SourcePath: "/docker_scratch"
+
+  StrelkaJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      JobDefinitionName: "Strelka"
+      Type: container
+      RetryStrategy:
+        Attempts: 1
+      Parameters:
+        BAMS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/bam/sorted.bam"
+        BAIS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/bam/sorted.bam.bai"
+        ReferenceS3Path: "s3://aws-batch-genomics-shared/secondary-analysis/reference/hg38.fa"
+        ReferenceIndexS3Path: "s3://aws-batch-genomics-shared/secondary-analysis/reference/hg38.fa.fai"
+        VCFS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/vcf"
+        WorkingDir: "/scratch"
+      ContainerProperties:
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/strelka"
+        Vcpus: 32
+        Memory: 32000
+        JobRoleArn:
+          Fn::ImportValue: !Sub "${RoleStackName}:ECSTaskRole"
+        Command:
+          - "--bam_s3_path"
+          - "Ref::BAMS3Path"
+          - "--bai_s3_path"
+          - "Ref::BAIS3Path"
+          - "--reference_s3_path"
+          - "Ref::ReferenceS3Path"
+          - "--reference_index_s3_path"
+          - "Ref::ReferenceIndexS3Path"
+          - "--vcf_s3_path"
+          - "Ref::VCFS3Path"
+          - "--working_dir"
+          - "Ref::WorkingDir"
+        MountPoints:
+          - ContainerPath: "/scratch"
+            ReadOnly: false
+            SourceVolume: docker_scratch
+        Volumes:
+          - Name: docker_scratch
+            Host:
+              SourcePath: "/docker_scratch"
+
+  SnpEffJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      JobDefinitionName: "SNPEff"
+      Type: container
+      RetryStrategy:
+        Attempts: 1
+      Parameters:
+        VCFS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/vcf/variants/genome.vcf.gz"
+        AnnotatedVCFS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/vcf/genome.anno.vcf"
+        CommandArgs: " -t hg38 "
+        WorkingDir: "/scratch"
+      ContainerProperties:
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/snpeff"
+        Vcpus: 4
+        Memory: 10000
+        JobRoleArn:
+          Fn::ImportValue: !Sub "${RoleStackName}:ECSTaskRole"
+        Command:
+          - "--annotated_vcf_s3_path"
+          - "Ref::AnnotatedVCFS3Path"
+          - "--vcf_s3_path"
+          - "Ref::VCFS3Path"
+          - "--cmd_args"
+          - "Ref::CommandArgs"
+          - "--working_dir"
+          - "Ref::WorkingDir"
+        MountPoints:
+          - ContainerPath: "/scratch"
+            ReadOnly: false
+            SourceVolume: docker_scratch
+        Volumes:
+          - Name: docker_scratch
+            Host:
+              SourcePath: "/docker_scratch"
+
+  SamtoolsStatsJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      JobDefinitionName: "SamtoolsStats"
+      Type: container
+      RetryStrategy:
+        Attempts: 1
+      Parameters:
+        ReferenceS3Path: "s3://aws-batch-genomics-shared/secondary-analysis/reference/hg38.fa"
+        BAMS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/bam/sorted.bam"
+        BAMStatsS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/bam/sorted.bam.stats"
+        WorkingDir: "/scratch"
+      ContainerProperties:
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/samtools-stats"
+        Vcpus: 4
+        Memory: 40000
+        JobRoleArn:
+          Fn::ImportValue: !Sub "${RoleStackName}:ECSTaskRole"
+        Command:
+          - "--bam_s3_path"
+          - "Ref::BAMS3Path"
+          - "--bam_stats_s3_path"
+          - "Ref::BAMStatsS3Path"
+          - "--reference_s3_path"
+          - "Ref::ReferenceS3Path"
+          - "--working_dir"
+          - "Ref::WorkingDir"
+        MountPoints:
+          - ContainerPath: "/scratch"
+            ReadOnly: false
+            SourceVolume: docker_scratch
+        Volumes:
+          - Name: docker_scratch
+            Host:
+              SourcePath: "/docker_scratch"

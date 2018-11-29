@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Setup Batch Compute Environment
+
+Parameters:
+  RoleStackName:
+    Description: "Stack that deploys roles for genomic workflow"
+    Type: String
+  VPCStackName:
+    Description: "Stack that deploys vps for genomic workflow"
+    Type: String
+  ImageId:
+    Description: "Image ID for BatchGenomics AMI."
+    Type: String
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-0be02032628f3507b
+    us-west-2:
+      AMI: ami-0151d1a9f263d8b04
+
+Resources:
+  GenomicSpotEnv:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ServiceRole:
+        Fn::ImportValue: !Sub "${RoleStackName}:BatchServiceRole"
+      Type: MANAGED
+      State: ENABLED
+      ComputeResources:
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub "${VPCStackName}:SecurityGroup"
+        BidPercentage: 50
+        InstanceRole:
+          Fn::ImportValue: !Sub "${RoleStackName}:ECSInstanceProfile"
+        InstanceTypes:
+          - c5.18xlarge
+        ImageId: !Sub "${ImageId}"
+        MinvCpus: 0
+        DesiredvCpus: 0
+        MaxvCpus: 256
+        SpotIamFleetRole:
+          Fn::ImportValue: !Sub "${RoleStackName}:SpotFleetRole"
+        Subnets:
+          - Fn::ImportValue: !Sub "${VPCStackName}:SubnetA"
+          - Fn::ImportValue: !Sub "${VPCStackName}:SubnetB"
+          - Fn::ImportValue: !Sub "${VPCStackName}:SubnetC"
+        # Generate an instance name tag that is unique to this environment
+        # using the VPC ID for this stack in case we have this stack deployed
+        # multiple times in an account.
+        Tags:
+          Name: !Sub "GenomicSpot"
+        Type: SPOT
+
+  GenomicOnDemandEnv:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ServiceRole:
+        Fn::ImportValue: !Sub "${RoleStackName}:BatchServiceRole"
+      Type: MANAGED
+      State: ENABLED
+      ComputeResources:
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub "${VPCStackName}:SecurityGroup"
+        InstanceRole:
+          Fn::ImportValue: !Sub "${RoleStackName}:ECSInstanceProfile"
+        InstanceTypes:
+          - c5.18xlarge
+        ImageId: !Sub "${ImageId}"
+        MinvCpus: 0
+        DesiredvCpus: 0
+        MaxvCpus: 256
+        Subnets:
+          - Fn::ImportValue: !Sub "${VPCStackName}:SubnetA"
+          - Fn::ImportValue: !Sub "${VPCStackName}:SubnetB"
+          - Fn::ImportValue: !Sub "${VPCStackName}:SubnetC"
+        # Generate an instance name tag that is unique to this environment
+        # using the VPC ID for this stack in case we have this stack deployed
+        # multiple times in an account.
+        Tags:
+          Name: !Sub "GenomicOnDemand"
+        Type: EC2
+        
+  HighPriorityQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      JobQueueName: "HighPriority"
+      Priority: 1000
+      State: ENABLED
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref GenomicOnDemandEnv
+
+  LowPriorityQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      JobQueueName: "LowPriority"
+      Priority: 1
+      State: ENABLED
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref GenomicSpotEnv
+

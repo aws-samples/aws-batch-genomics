@@ -1,0 +1,118 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Setup Batch genomics pipeline infrastructure
+
+Parameters:
+  TemplatesBucket:
+    Description: "S3 bucket that stores the nested templates"
+    Type: String
+  ImageId:
+    Description: "Image ID for BatchGenomics AMI."
+    Type: String
+
+Resources:
+  # Bucket to store job results
+  JobResultsBucket:
+    Type: "AWS::S3::Bucket"
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/vpc_template_cfn.yml"
+      TimeoutInMinutes: '5'
+  RoleStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/roles_template_cfn.yml"
+      TimeoutInMinutes: '5'
+  BatchEnvStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/batch_env_template_cfn.yml"
+      Parameters:
+        RoleStackName: !GetAtt RoleStack.Outputs.StackName
+        VPCStackName: !GetAtt VPCStack.Outputs.StackName
+        ImageId: !Sub "${ImageId}"
+      TimeoutInMinutes: '5'
+  BatchJobStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/batch_jobs_template_cfn.yml"
+      Parameters:
+        RoleStackName: !GetAtt RoleStack.Outputs.StackName
+        JobResultsBucket: !Ref JobResultsBucket
+      TimeoutInMinutes: '5'
+  StateMachineStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/state_machine_template_cfn.yml"
+      Parameters:
+        RoleStackName: !GetAtt RoleStack.Outputs.StackName
+      TimeoutInMinutes: '5'
+
+Outputs:
+  ImageId:
+    Value: !Sub "${ImageId}"
+  # Makes job results bucket available to other stacks
+  JobResultsBucket:
+    Description: JobResultsBucket
+    Value: !Ref JobResultsBucket
+  # Makes state machine stack name available to other stacks
+  StateMachineStack:
+    Description: StateMachineStack
+    Value: !GetAtt StateMachineStack.Outputs.StackName
+  # Generate the example workflow input by adding in the jobs result bucket.
+  # This input is used in the run.sh command.
+  FullWorkflowInput:
+    Description: Full workflow input
+    Value: !Sub |-
+      {
+        "isaac": {
+          "WorkingDir": "/scratch",
+          "JobName": "isaac1",
+          "FastQ1S3Path": "s3://aws-batch-genomics-shared/secondary-analysis/example-files/fastq/SRR1919605_1.fastq.gz",
+          "BAMS3FolderPath": "s3://${JobResultsBucket}/NA12878/bam",
+          "FastQ2S3Path": "s3://aws-batch-genomics-shared/secondary-analysis/example-files/fastq/SRR1919605_1.fastq.gz",
+          "ReferenceS3Path": "s3://aws-batch-genomics-shared/secondary-analysis/reference/isaac/"
+        },
+        "strelka": {
+          "WorkingDir": "/scratch",
+          "JobName": "strelka1",
+          "BAIS3Path": "s3://${JobResultsBucket}/NA12878/bam/sorted.bam.bai",
+          "BAMS3Path": "s3://${JobResultsBucket}/NA12878/bam/sorted.bam",
+          "VCFS3Path": "s3://${JobResultsBucket}/NA12878/vcf",
+          "ReferenceS3Path": "s3://aws-batch-genomics-shared/secondary-analysis/reference/hg38.fa",
+          "ReferenceIndexS3Path": "s3://aws-batch-genomics-shared/secondary-analysis/reference/hg38.fa.fai"
+        },
+        "samtools": {
+          "WorkingDir": "/scratch",
+          "JobName": "samtools1",
+          "BAMS3Path": "s3://${JobResultsBucket}/NA12878/bam/sorted.bam",
+          "ReferenceS3Path": "s3://aws-batch-genomics-shared/secondary-analysis/reference/hg38.fa",
+          "BAMStatsS3Path": "s3://${JobResultsBucket}/NA12878/bam/sorted.bam.stats"
+        },
+        "snpeff": {
+          "WorkingDir": "/scratch",
+          "JobName": "snpeff1",
+          "VCFS3Path": "s3://${JobResultsBucket}/NA12878/vcf/variants/genome.vcf.gz",
+          "AnnotatedVCFS3Path": "s3://${JobResultsBucket}/NA12878/vcf/genome.anno.vcf",
+          "CommandArgs": " -t hg38 "
+        }
+      }
+  # A minimal example workflow input.  All the job definitions have defaults.
+  MinimalWorkflowInput:
+    Description: Minimal workflow input
+    Value: !Sub |-
+      {
+        "isaac": {},
+        "strelka": {},
+        "samtools": {},
+        "snpeff": {}
+      }
+
+# TEMPLATES_BUCKET=$(aws cloudformation describe-stacks --stack-name batch-genomics-zone --query 'Stacks[].Outputs[?OutputKey==`TemplatesBucket`].OutputValue' --output text)
+# IMAGE_ID=$(aws cloudformation describe-stacks --stack-name batch-genomics-pipeline --query 'Stacks[].Outputs[?OutputKey==`ImageId`].OutputValue' --output text)
+
+# aws cloudformation update-stack --stack-name batch-genomics-pipeline --template-body file://template_cfn.yml --capabilities CAPABILITY_NAMED_IAM --output text --parameters ParameterKey=TemplatesBucket,ParameterValue=${TEMPLATES_BUCKET} ParameterKey=ImageId,ParameterValue=${IMAGE_ID};aws cloudformation wait stack-update-complete --stack-name batch-genomics-pipeline
+
+# aws cloudformation create-stack --stack-name batch-genomics-pipeline --template-body file://template_cfn.yml --enable-termination-protection --output text --parameters ParameterKey=TemplatesBucket,ParameterValue=${TEMPLATES_BUCKET} ParameterKey=ImageId,ParameterValue=${IMAGE_ID}; aws cloudformation wait stack-create-complete --stack-name batch-genomics-pipeline
+

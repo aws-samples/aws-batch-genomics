@@ -22,7 +22,7 @@ RUN apt-get -y update && \
 RUN pip install boto3 awscli
 
 # Application installation
-RUN wget -O /snpeff.zip https://downloads.sourceforge.net/project/snpeff/snpEff_v${UNDERSCORE_VERSION}_core.zip && \
+RUN wget -O /snpeff.zip https://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip && \
     unzip /snpeff.zip && rm /snpeff.zip
 
 RUN java -jar /snpEff/snpEff.jar download hg38

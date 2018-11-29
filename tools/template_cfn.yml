@@ -1,0 +1,694 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Setup SSM document to deploy tools
+
+Parameters:
+  TemplatesBucketArn:
+    Description: "ARN of template bucket."
+    Type: String
+  TemplatesBucketName:
+    Description: "Name of template bucket."
+    Type: String
+
+Mappings:
+
+    # These are the latest ECS optimized AMIs as of December 2018:
+    # You can find the latest available on this page of our documentation:
+    # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/al2ami.html
+    # (note the AMI identifier is region specific)
+
+    AWSRegionToAMI:
+        us-east-2:
+            AMI: ami-037a92bf1efdb11a2
+        us-east-1:
+            AMI: ami-0a6b7e0cc0b1f464f
+        us-west-2:
+            AMI: ami-0c1f4871ebaae6d86
+        us-west-1:
+            AMI: ami-0184f498956de7db5
+        eu-west-3:
+            AMI: ami-0caadc4f0db31a303
+        eu-west-2:
+            AMI: ami-0b5225210a12d9951
+        eu-west-1:
+            AMI: ami-0acc9f8be17a41897
+        eu-central-1:
+            AMI: ami-055aa9664ef169e25
+        ap-northeast-2:
+            AMI: ami-0bdc871079baf9649
+        ap-northeast-1:
+            AMI: ami-0c38293d60d98af86
+        ap-southeast-2:
+            AMI: ami-0eed1c915ea891aca
+        ap-southeast-1:
+            AMI: ami-0e28ff4e3f1776d86
+        ca-central-1:
+            AMI: ami-02c80e9173258d289
+        ap-south-1:
+            AMI: ami-0b7c3be99909df6ef
+        sa-east-1:
+            AMI: ami-078146697425f25a7
+
+Resources:
+  AWSBatchGenomicsManagedInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSBatchGenomicsManagedInstanceRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ssm.amazonaws.com
+            - ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      Path: "/"
+      Policies:
+        - PolicyName: BuildAndDeployAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - 's3:GetObject'
+                Effect: Allow
+                Resource: !Sub '${TemplatesBucketArn}/*'
+              - Action:
+                  - 'ecr:CreateRepository'
+                  - 'ecr:GetAuthorizationToken'
+                  - 'ecr:BatchCheckLayerAvailability'
+                Effect: Allow
+                Resource: '*'
+              - Action:
+                  - 'ecr:DescribeRepositories'
+                Effect: Allow
+                Resource: !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*'
+              - Action:
+                  - 'ecr:SetRepositoryPolicy'
+                  - 'ecr:CompleteLayerUpload'
+                  - 'ecr:UploadLayerPart'
+                  - 'ecr:InitiateLayerUpload'
+                  - 'ecr:PutImage'
+                Effect: Allow
+                Resource: !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*'
+  AWSBatchGenomicsManagedInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - !Ref AWSBatchGenomicsManagedInstanceRole
+      InstanceProfileName: AWSBatchGenomicsManagedInstanceProfile
+
+  AWSBatchGenomicsAutomationServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ssm.amazonaws.com
+            - ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole
+      Path: "/"
+      RoleName: AWSBatchGenomicsAutomationServiceRole
+      Policies:
+      - PolicyName: passrole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - iam:PassRole
+            Resource:
+            - !GetAtt AWSBatchGenomicsManagedInstanceRole.Arn
+
+  AWSBatchGenomicsBuildAmiSsmDocument:
+    Type: "AWS::SSM::Document"
+    Properties:
+      DocumentType: Automation
+      Content: !Sub
+      - |
+        {
+          "schemaVersion": "0.3",
+          "description": "Creates AMI for aws-batch-genomics based on the ECS AMI.",
+          "assumeRole": "${AWSBatchGenomicsAutomationServiceRole.Arn}",
+          "parameters": {
+            "SourceAmiId": {
+              "type": "String",
+              "description": "(Required) The source Amazon Machine Image ID.",
+              "default": "${SourceAmiId}"
+            },
+            "IamInstanceProfileName": {
+              "type": "String",
+              "description": "(Required) The instance profile that enables Systems Manager (SSM) to manage the instance.",
+              "default": "${AWSBatchGenomicsManagedInstanceProfile}"
+            },
+            "AutomationAssumeRole": {
+              "type": "String",
+              "description": "(Required) The ARN of the role that allows Automation to perform the actions on your behalf.",
+              "default": "${AWSBatchGenomicsAutomationServiceRole.Arn}"
+            },
+            "Volume": {
+              "type": "String",
+              "description": "Volume to mount.",
+              "default": "/dev/nvme1n1"
+            },
+            "TargetAmiName": {
+              "type": "String",
+              "description": "(Optional) The name of the new AMI that will be created. Default is a system-generated string including the source AMI id, and the creation time and date.",
+              "default": "BatchGenomicsAMI_NVME_from_ECS_AMI_{{SourceAmiId}}_on_{{global:DATE_TIME}}"
+            },
+            "InstanceType": {
+              "type": "String",
+              "description": "(Optional) Type of instance to launch as the workspace host. Instance types vary by region. Default is t2.micro.",
+              "default": "c5.xlarge"
+            },
+            "PreUpdateScript": {
+              "type": "String",
+              "description": "(Optional) URL of a script to run before updates are applied. Default (\"none\") is to not run a script.",
+              "default": "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucketName}/install_ssm_agent.sh"
+            },
+            "PostUpdateScript": {
+              "type": "String",
+              "description": "(Optional) URL of a script to run after package updates are applied. Default (\"none\") is to not run a script.",
+              "default": "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucketName}/install_ssm_agent.sh"
+            },
+            "IncludePackages": {
+              "type": "String",
+              "description": "(Optional) Only update these named packages. By default (\"all\"), all available updates are applied.",
+              "default": "all"
+            },
+            "ExcludePackages": {
+              "type": "String",
+              "description": "(Optional) Names of packages to hold back from updates, under all conditions. By default (\"none\"), no package is excluded.",
+              "default": "none"
+            }
+          },
+          "mainSteps": [
+            {
+              "name": "launchInstance",
+              "action": "aws:runInstances",
+              "maxAttempts": 3,
+              "timeoutSeconds": 1200,
+              "onFailure": "Abort",
+              "inputs": {
+                "ImageId": "{{SourceAmiId}}",
+                "InstanceType": "{{InstanceType}}",
+                "UserData": "IyEvYmluL2Jhc2gNCg0KZnVuY3Rpb24gZ2V0X2NvbnRlbnRzKCkgew0KICAgIGlmIFsgLXggIiQod2hpY2ggY3VybCkiIF07IHRoZW4NCiAgICAgICAgY3VybCAtcyAtZiAiJDEiDQogICAgZWxpZiBbIC14ICIkKHdoaWNoIHdnZXQpIiBdOyB0aGVuDQogICAgICAgIHdnZXQgIiQxIiAtTyAtDQogICAgZWxzZQ0KICAgICAgICBkaWUgIk5vIGRvd25sb2FkIHV0aWxpdHkgKGN1cmwsIHdnZXQpIg0KICAgIGZpDQp9DQoNCnJlYWRvbmx5IElERU5USVRZX1VSTD0iaHR0cDovLzE2OS4yNTQuMTY5LjI1NC8yMDE2LTA2LTMwL2R5bmFtaWMvaW5zdGFuY2UtaWRlbnRpdHkvZG9jdW1lbnQvIg0KcmVhZG9ubHkgVFJVRV9SRUdJT049JChnZXRfY29udGVudHMgIiRJREVOVElUWV9VUkwiIHwgYXdrIC1GXCIgJy9yZWdpb24vIHsgcHJpbnQgJDQgfScpDQpyZWFkb25seSBERUZBVUxUX1JFR0lPTj0idXMtZWFzdC0xIg0KcmVhZG9ubHkgUkVHSU9OPSIke1RSVUVfUkVHSU9OOi0kREVGQVVMVF9SRUdJT059Ig0KDQpyZWFkb25seSBTQ1JJUFRfTkFNRT0iYXdzLWluc3RhbGwtc3NtLWFnZW50Ig0KcmVhZG9ubHkgU0NSSVBUX1VSTD0iaHR0cHM6Ly9hd3Mtc3NtLWRvd25sb2Fkcy0kUkVHSU9OLnMzLmFtYXpvbmF3cy5jb20vc2NyaXB0cy8kU0NSSVBUX05BTUUiDQoNCmNkIC90bXANCkZJTEVfU0laRT0wDQpNQVhfUkVUUllfQ09VTlQ9Mw0KUkVUUllfQ09VTlQ9MA0KDQp3aGlsZSBbICRSRVRSWV9DT1VOVCAtbHQgJE1BWF9SRVRSWV9DT1VOVCBdIDsgZG8NCiAgZWNobyBBV1MtVXBkYXRlTGludXhBbWk6IERvd25sb2FkaW5nIHNjcmlwdCBmcm9tICRTQ1JJUFRfVVJMDQogIGdldF9jb250ZW50cyAiJFNDUklQVF9VUkwiID4gIiRTQ1JJUFRfTkFNRSINCiAgRklMRV9TSVpFPSQoZHUgLWsgL3RtcC8kU0NSSVBUX05BTUUgfCBjdXQgLWYxKQ0KICBlY2hvIEFXUy1VcGRhdGVMaW51eEFtaTogRmluaXNoZWQgZG93bmxvYWRpbmcgc2NyaXB0LCBzaXplOiAkRklMRV9TSVpFDQogIGlmIFsgJEZJTEVfU0laRSAtZ3QgMCBdOyB0aGVuDQogICAgYnJlYWsNCiAgZWxzZQ0KICAgIGlmIFtbICRSRVRSWV9DT1VOVCAtbHQgTUFYX1JFVFJZX0NPVU5UIF1dOyB0aGVuDQogICAgICBSRVRSWV9DT1VOVD0kKChSRVRSWV9DT1VOVCsxKSk7DQogICAgICBlY2hvIEFXUy1VcGRhdGVMaW51eEFtaTogRmlsZVNpemUgaXMgMCwgcmV0cnlDb3VudDogJFJFVFJZX0NPVU5UDQogICAgZmkNCiAgZmkgDQpkb25lDQoNCmlmIFsgJEZJTEVfU0laRSAtZ3QgMCBdOyB0aGVuDQogIGNobW9kICt4ICIkU0NSSVBUX05BTUUiDQogIGVjaG8gQVdTLVVwZGF0ZUxpbnV4QW1pOiBSdW5uaW5nIFVwZGF0ZVNTTUFnZW50IHNjcmlwdCBub3cgLi4uLg0KICAuLyIkU0NSSVBUX05BTUUiIC0tcmVnaW9uICIkUkVHSU9OIg0KZWxzZQ0KICBlY2hvIEFXUy1VcGRhdGVMaW51eEFtaTogVW5hYmxlIHRvIGRvd25sb2FkIHNjcmlwdCwgcXVpdHRpbmcgLi4uLg0KZmkNCg==",
+                "MinInstanceCount": 1,
+                "MaxInstanceCount": 1,
+                "IamInstanceProfileName": "{{IamInstanceProfileName}}",
+                "BlockDeviceMappings": [
+                  {
+                    "DeviceName": "/dev/sdb",
+                    "Ebs": {
+                      "DeleteOnTermination": true,
+                      "VolumeSize": 1000
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "updateOSSoftware",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "[ -x \"$(which wget)\" ] && get_contents='wget $1 -O -'",
+                    "[ -x \"$(which curl)\" ] && get_contents='curl -s -f $1'",
+                    "if [[ {{global:REGION}} == 'us-gov-'* ]]",
+                    "then",
+                    "eval $get_contents https://s3-fips-{{global:REGION}}.amazonaws.com/aws-ssm-downloads-{{global:REGION}}/scripts/aws-update-linux-instance > /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "elif [[ {{global:REGION}} == 'cn-'* ]]",
+                    "then",
+                    "eval $get_contents https://aws-ssm-downloads-{{global:REGION}}.s3.{{global:REGION}}.amazonaws.com.cn/scripts/aws-update-linux-instance > /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "else",
+                    "eval $get_contents https://aws-ssm-downloads-{{global:REGION}}.s3.amazonaws.com/scripts/aws-update-linux-instance > /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "fi",
+                    "chmod +x /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "/var/lib/amazon/ssm/aws-update-linux-instance --pre-update-script '{{PreUpdateScript}}' --post-update-script '{{PostUpdateScript}}' --include-packages '{{IncludePackages}}' --exclude-packages '{{ExcludePackages}}' 2>&1 | tee /tmp/aws-update-linux-instance.log",
+                    "rm -rf /var/lib/amazon/ssm/aws-update-linux-instance"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "verifySsmInstall",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 1200,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "hostname"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "mountScratchVolume",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "yum -y update",
+                    "yum -y install parted",
+                    "parted /dev/nvme1n1 mklabel gpt -s",
+                    "parted /dev/nvme1n1 mkpart primary 0% 100% -s",
+                    "mkfs -t ext4 -F /dev/nvme1n1",
+                    "mkdir /docker_scratch",
+                    "echo -e '/dev/nvme1n1\t/docker_scratch\text4\tdefaults\t0\t0' | sudo tee -a /etc/fstab",
+                    "mount -a"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "installAwsCli",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "curl 'https://s3.amazonaws.com/aws-cli/awscli-bundle.zip' -o 'awscli-bundle.zip'",
+                    "yum install unzip -y",
+                    "unzip awscli-bundle.zip",
+                    "./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws",
+                    "rm -rf awscli-bundle",
+                    "rm awscli-bundle.zip",
+                    "echo 'export PATH=/usr/local/bin:$PATH' >>~/.bash_profile",
+                    "source ~/.bash_profile",
+                    "aws --version"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "stopInstance",
+              "action": "aws:changeInstanceState",
+              "maxAttempts": 1,
+              "timeoutSeconds": 1200,
+              "onFailure": "Abort",
+              "inputs": {
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "DesiredState": "stopped"
+              }
+            },
+            {
+              "name": "createImage",
+              "action": "aws:createImage",
+              "maxAttempts": 1,
+              "onFailure": "Abort",
+              "inputs": {
+                "InstanceId": "{{launchInstance.InstanceIds}}",
+                "ImageName": "{{TargetAmiName}}",
+                "NoReboot": true,
+                "ImageDescription": "AMI Generated by EC2 Automation on {{global:DATE_TIME}} from {{SourceAmiId}}"
+              }
+            },
+            {
+              "name": "startInstance",
+              "action": "aws:changeInstanceState",
+              "maxAttempts": 1,
+              "timeoutSeconds": 1200,
+              "onFailure": "Abort",
+              "inputs": {
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "DesiredState": "running"
+              }
+            },
+            {
+              "name": "testMountedVolume",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 1200,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "touch /docker_scratch/test.txt",
+                    "rm /docker_scratch/test.txt"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "terminateInstance",
+              "action": "aws:changeInstanceState",
+              "maxAttempts": 1,
+              "onFailure": "Continue",
+              "inputs": {
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "DesiredState": "terminated"
+              }
+            }
+          ],
+          "outputs": [
+            "createImage.ImageId"
+          ]
+        }
+      - {
+        # This is where we keep the complex things we want inserted into the Fn::Sub literal block
+        # You can even use Fn::If statements in this section
+        SourceAmiId: !FindInMap [AWSRegionToAMI, !Ref "AWS::Region", AMI]
+        }
+
+  AWSBatchGenomicsBuildToolsSsmDocument:
+    Type: "AWS::SSM::Document"
+    Properties:
+      DocumentType: Automation
+      Content: !Sub
+      - |
+        {
+          "schemaVersion": "0.3",
+          "description": "Build and deploy tools for aws-batch-genomics.",
+          "assumeRole": "${AWSBatchGenomicsAutomationServiceRole.Arn}",
+          "parameters": {
+            "SourceAmiId": {
+              "type": "String",
+              "description": "(Required) The source Amazon Machine Image ID.",
+              "default": "${SourceAmiId}"
+            },
+            "IamInstanceProfileName": {
+              "type": "String",
+              "description": "(Required) The instance profile that enables Systems Manager (SSM) to manage the instance.",
+              "default": "${AWSBatchGenomicsManagedInstanceProfile}"
+            },
+            "AutomationAssumeRole": {
+              "type": "String",
+              "description": "(Required) The ARN of the role that allows Automation to perform the actions on your behalf.",
+              "default": "${AWSBatchGenomicsAutomationServiceRole.Arn}"
+            },
+            "InstanceType": {
+              "type": "String",
+              "description": "(Optional) Type of instance to launch as the workspace host. Instance types vary by region. Default is t2.micro.",
+              "default": "c5.xlarge"
+            },
+            "PreUpdateScript": {
+              "type": "String",
+              "description": "(Optional) URL of a script to run before updates are applied. Default (\"none\") is to not run a script.",
+              "default": "none"
+            },
+            "PostUpdateScript": {
+              "type": "String",
+              "description": "(Optional) URL of a script to run after package updates are applied. Default (\"none\") is to not run a script.",
+              "default": "https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucketName}/install_ssm_agent.sh"
+            },
+            "IncludePackages": {
+              "type": "String",
+              "description": "(Optional) Only update these named packages. By default (\"all\"), all available updates are applied.",
+              "default": "all"
+            },
+            "ExcludePackages": {
+              "type": "String",
+              "description": "(Optional) Names of packages to hold back from updates, under all conditions. By default (\"none\"), no package is excluded.",
+              "default": "none"
+            }
+          },
+          "mainSteps": [
+            {
+              "name": "launchInstance",
+              "action": "aws:runInstances",
+              "maxAttempts": 3,
+              "timeoutSeconds": 1200,
+              "onFailure": "Abort",
+              "inputs": {
+                "ImageId": "{{SourceAmiId}}",
+                "InstanceType": "{{InstanceType}}",
+                "UserData": "IyEvYmluL2Jhc2gNCg0KZnVuY3Rpb24gZ2V0X2NvbnRlbnRzKCkgew0KICAgIGlmIFsgLXggIiQod2hpY2ggY3VybCkiIF07IHRoZW4NCiAgICAgICAgY3VybCAtcyAtZiAiJDEiDQogICAgZWxpZiBbIC14ICIkKHdoaWNoIHdnZXQpIiBdOyB0aGVuDQogICAgICAgIHdnZXQgIiQxIiAtTyAtDQogICAgZWxzZQ0KICAgICAgICBkaWUgIk5vIGRvd25sb2FkIHV0aWxpdHkgKGN1cmwsIHdnZXQpIg0KICAgIGZpDQp9DQoNCnJlYWRvbmx5IElERU5USVRZX1VSTD0iaHR0cDovLzE2OS4yNTQuMTY5LjI1NC8yMDE2LTA2LTMwL2R5bmFtaWMvaW5zdGFuY2UtaWRlbnRpdHkvZG9jdW1lbnQvIg0KcmVhZG9ubHkgVFJVRV9SRUdJT049JChnZXRfY29udGVudHMgIiRJREVOVElUWV9VUkwiIHwgYXdrIC1GXCIgJy9yZWdpb24vIHsgcHJpbnQgJDQgfScpDQpyZWFkb25seSBERUZBVUxUX1JFR0lPTj0idXMtZWFzdC0xIg0KcmVhZG9ubHkgUkVHSU9OPSIke1RSVUVfUkVHSU9OOi0kREVGQVVMVF9SRUdJT059Ig0KDQpyZWFkb25seSBTQ1JJUFRfTkFNRT0iYXdzLWluc3RhbGwtc3NtLWFnZW50Ig0KcmVhZG9ubHkgU0NSSVBUX1VSTD0iaHR0cHM6Ly9hd3Mtc3NtLWRvd25sb2Fkcy0kUkVHSU9OLnMzLmFtYXpvbmF3cy5jb20vc2NyaXB0cy8kU0NSSVBUX05BTUUiDQoNCmNkIC90bXANCkZJTEVfU0laRT0wDQpNQVhfUkVUUllfQ09VTlQ9Mw0KUkVUUllfQ09VTlQ9MA0KDQp3aGlsZSBbICRSRVRSWV9DT1VOVCAtbHQgJE1BWF9SRVRSWV9DT1VOVCBdIDsgZG8NCiAgZWNobyBBV1MtVXBkYXRlTGludXhBbWk6IERvd25sb2FkaW5nIHNjcmlwdCBmcm9tICRTQ1JJUFRfVVJMDQogIGdldF9jb250ZW50cyAiJFNDUklQVF9VUkwiID4gIiRTQ1JJUFRfTkFNRSINCiAgRklMRV9TSVpFPSQoZHUgLWsgL3RtcC8kU0NSSVBUX05BTUUgfCBjdXQgLWYxKQ0KICBlY2hvIEFXUy1VcGRhdGVMaW51eEFtaTogRmluaXNoZWQgZG93bmxvYWRpbmcgc2NyaXB0LCBzaXplOiAkRklMRV9TSVpFDQogIGlmIFsgJEZJTEVfU0laRSAtZ3QgMCBdOyB0aGVuDQogICAgYnJlYWsNCiAgZWxzZQ0KICAgIGlmIFtbICRSRVRSWV9DT1VOVCAtbHQgTUFYX1JFVFJZX0NPVU5UIF1dOyB0aGVuDQogICAgICBSRVRSWV9DT1VOVD0kKChSRVRSWV9DT1VOVCsxKSk7DQogICAgICBlY2hvIEFXUy1VcGRhdGVMaW51eEFtaTogRmlsZVNpemUgaXMgMCwgcmV0cnlDb3VudDogJFJFVFJZX0NPVU5UDQogICAgZmkNCiAgZmkgDQpkb25lDQoNCmlmIFsgJEZJTEVfU0laRSAtZ3QgMCBdOyB0aGVuDQogIGNobW9kICt4ICIkU0NSSVBUX05BTUUiDQogIGVjaG8gQVdTLVVwZGF0ZUxpbnV4QW1pOiBSdW5uaW5nIFVwZGF0ZVNTTUFnZW50IHNjcmlwdCBub3cgLi4uLg0KICAuLyIkU0NSSVBUX05BTUUiIC0tcmVnaW9uICIkUkVHSU9OIg0KZWxzZQ0KICBlY2hvIEFXUy1VcGRhdGVMaW51eEFtaTogVW5hYmxlIHRvIGRvd25sb2FkIHNjcmlwdCwgcXVpdHRpbmcgLi4uLg0KZmkNCg==",
+                "MinInstanceCount": 1,
+                "MaxInstanceCount": 1,
+                "IamInstanceProfileName": "{{IamInstanceProfileName}}",
+                "BlockDeviceMappings": [
+                  {
+                    "DeviceName": "/dev/xvdcz",
+                    "Ebs": {
+                      "VolumeSize": 500
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "updateOSSoftware",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "[ -x \"$(which wget)\" ] && get_contents='wget $1 -O -'",
+                    "[ -x \"$(which curl)\" ] && get_contents='curl -s -f $1'",
+                    "if [[ {{global:REGION}} == 'us-gov-'* ]]",
+                    "then",
+                    "eval $get_contents https://s3-fips-{{global:REGION}}.amazonaws.com/aws-ssm-downloads-{{global:REGION}}/scripts/aws-update-linux-instance > /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "elif [[ {{global:REGION}} == 'cn-'* ]]",
+                    "then",
+                    "eval $get_contents https://aws-ssm-downloads-{{global:REGION}}.s3.{{global:REGION}}.amazonaws.com.cn/scripts/aws-update-linux-instance > /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "else",
+                    "eval $get_contents https://aws-ssm-downloads-{{global:REGION}}.s3.amazonaws.com/scripts/aws-update-linux-instance > /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "fi",
+                    "chmod +x /var/lib/amazon/ssm/aws-update-linux-instance",
+                    "/var/lib/amazon/ssm/aws-update-linux-instance --pre-update-script '{{PreUpdateScript}}' --post-update-script '{{PostUpdateScript}}' --include-packages '{{IncludePackages}}' --exclude-packages '{{ExcludePackages}}' 2>&1 | tee /tmp/aws-update-linux-instance.log",
+                    "rm -rf /var/lib/amazon/ssm/aws-update-linux-instance"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "verifySsmInstall",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 1200,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "hostname"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "installAwsCli",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "curl 'https://s3.amazonaws.com/aws-cli/awscli-bundle.zip' -o 'awscli-bundle.zip'",
+                    "yum install unzip -y",
+                    "unzip awscli-bundle.zip",
+                    "./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws",
+                    "rm -rf awscli-bundle",
+                    "rm awscli-bundle.zip",
+                    "echo 'export PATH=/usr/local/bin:$PATH' >>~/.bash_profile",
+                    "source ~/.bash_profile",
+                    "aws --version"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "installToolsSetup",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "aws s3 cp s3://${TemplatesBucketName}/tools.zip .",
+                    "unzip tools.zip",
+                    "rm tools.zip"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "buildAndDeploySnpeff",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "export AWS_DEFAULT_REGION={{global:REGION}}",
+                    "eval $(aws ecr get-login --no-include-email)",
+                    "./tools/snpeff/setup.sh"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "buildAndDeployIsaac",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "export AWS_DEFAULT_REGION={{global:REGION}}",
+                    "eval $(aws ecr get-login --no-include-email)",
+                    "./tools/isaac/setup.sh"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "buildAndDeployStrelka",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "export AWS_DEFAULT_REGION={{global:REGION}}",
+                    "eval $(aws ecr get-login --no-include-email)",
+                    "./tools/strelka/setup.sh"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "buildAndDeploySamtoolsStats",
+              "action": "aws:runCommand",
+              "maxAttempts": 1,
+              "timeoutSeconds": 3600,
+              "onFailure": "Abort",
+              "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "Parameters": {
+                  "commands": [
+                    "set -e",
+                    "export AWS_DEFAULT_REGION={{global:REGION}}",
+                    "eval $(aws ecr get-login --no-include-email)",
+                    "./tools/samtools_stats/setup.sh"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "terminateInstance",
+              "action": "aws:changeInstanceState",
+              "maxAttempts": 1,
+              "onFailure": "Continue",
+              "inputs": {
+                "InstanceIds": [
+                  "{{launchInstance.InstanceIds}}"
+                ],
+                "DesiredState": "terminated"
+              }
+            }
+          ],
+          "outputs": [
+          ]
+        }
+      - {
+        # This is where we keep the complex things we want inserted into the Fn::Sub literal block
+        # You can even use Fn::If statements in this section
+        SourceAmiId: !FindInMap [AWSRegionToAMI, !Ref "AWS::Region", AMI]
+        }
+
+Outputs:
+  AccountId:
+    Value: !Sub "${AWS::AccountId}"
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", AccountId ] ]
+  BuildAMIDocumentName:
+    Value: !Ref AWSBatchGenomicsBuildAmiSsmDocument
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", BuildAMIDocumentName ] ]
+  BuildToolsDocumentName:
+    Value: !Ref AWSBatchGenomicsBuildToolsSsmDocument
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", BuildToolsDocumentName ] ]

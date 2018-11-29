@@ -1,0 +1,25 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Setup artifacts for deployment
+
+# Creates artifacts needed to deploy the pipeline infrastructure.
+
+Resources:
+  # Stores the nested CloudFormation templates.  They need to be in S3.
+  TemplatesBucket:
+    Type: "AWS::S3::Bucket"
+
+Outputs:
+  # Make available the templates bucket name and path for use deployment stack.
+  TemplatesBucket:
+    Value: !Ref TemplatesBucket
+  TemplatesBucketArn:
+    Value: !GetAtt TemplatesBucket.Arn
+  TemplatesBucketURL:
+    Value: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}'
+
+
+# aws cloudformation update-stack --stack-name batch-genomics-zone --template-body file://template_cfn.yml --output text; aws cloudformation wait stack-update-complete --stack-name batch-genomics-zone
+
+# aws cloudformation create-stack --stack-name batch-genomics-zone --template-body file://template_cfn.yml --enable-termination-protection --output text; aws cloudformation wait stack-create-complete --stack-name batch-genomics-zone
+
