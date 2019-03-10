@@ -9,6 +9,11 @@ This project demonstrates how to run a large-scale, genomics secondary-analysis 
 
 * [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/installing.html)
 * Admin permissions for deployment
+    * SSM
+    * Region set
+    * teardown: write UpdateTerminationProtection
+* Tools zipped 
+
 
 ## DEPLOY
 
@@ -39,9 +44,78 @@ $ update.sh
 **Teardown Pipeline Stack**
 
 *Deletes everything except the custom AMI and ECR images.*
+This includes 
+1. The S3 bucket with results
+2. Roles
+
 
 ````bash
 $ teardown.sh
 ````
+
+## Compute Environment
+
+**Stacks**
+
+ 1. batch-genomics-zone  - creates S3 bucket for holding tools & nested stacks
+ 2. batch-genomics-tools 
+     - IAM role for Batch
+     - SSM for deploying AMI 
+     - Repo in ECR & build/push docker
+ 3. batch-genomics-pipeline (nested)
+     - VPC stack
+     - role stack
+     - batchEnvstack
+     - batchJobstack
+     - statemachinestack
+
+**Resources**
+ 1. S3: 
+     - batch-genomics-zone-templatesbucket-UID
+     - batch-genomics-pipeline-jobresultsbucket-UID
+ 2. SSM: 
+     - batch-genomics-tools-AWSBatchGenomicsBuildAmiSsmDocument-UID
+     - batch-genomics-tools-AWSBatchGenomicsBuildToolsSsmDocument-UID
+ 3. AMI: BatchGenomics-TIMESTAMP
+ 4. ECR: 
+     - Isaac
+     - SamtoolsStats
+     - SNPEff
+     - Strelka
+ 5. VPC:
+     - vpc-UID
+     - VPCGatewayAttachment: batch-VPCGa-UID 
+     - subnets (A,B,C): subnet-UID
+     - SubnetRoutTableAssociation (A,B,C): rtbassoc-UID
+     - RouteTable: rtb-UID
+     - InternetGateway: igw-UID
+     - InternetRoute: batch-Inter-UID
+     - SecurityGroup: sg-UID   
+ 6.   - IAMRoles
+        - BatchServiceRole-UID
+        - ECSInstanceRole-UID
+        -  ECSTaskRole-UID
+        -  SpotFleetRole-UID
+        -  StatesExecutionRole-UID
+     - InstanceProfile
+        -  ECSInstanceRole-UID
+ 6. BatchEnvironment
+     - BatchComputeEnv: 
+        -  GenomicOnDemandEnv-UID
+        -  GenomicSpotEnv-UID
+     - Batch Job Queue
+        -  HighPriority
+        -  LowPriority
+ 7. BatchJob Definitions
+     - Isaac:1
+     - SamtoolsStats:1
+     - SNPEff:1
+     - Strelka:1
+ 8. StepFunction stateMachine:
+     - GenomicWorkflow-UID
+
+**Notes**
+ - AWS multi-tenant adapter is common_utils; any updates to it requires a re-build/push to docker
+ - re-running execution overwrites objects in result bucket
 
 
