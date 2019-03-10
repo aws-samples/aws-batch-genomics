@@ -29,7 +29,7 @@ Resources:
         ReferenceS3Path: "s3://aws-batch-genomics-shared/secondary-analysis/reference/isaac/"
         WorkingDir: "/scratch"
       ContainerProperties:
-        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/isaac"
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/isaac"
         Vcpus: 32
         Memory: 80000
         JobRoleArn:
@@ -69,7 +69,7 @@ Resources:
         VCFS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/vcf"
         WorkingDir: "/scratch"
       ContainerProperties:
-        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/strelka"
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/strelka"
         Vcpus: 32
         Memory: 32000
         JobRoleArn:
@@ -109,7 +109,7 @@ Resources:
         CommandArgs: " -t hg38 "
         WorkingDir: "/scratch"
       ContainerProperties:
-        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/snpeff"
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/snpeff"
         Vcpus: 4
         Memory: 10000
         JobRoleArn:
@@ -145,7 +145,7 @@ Resources:
         BAMStatsS3Path: !Sub "s3://${JobResultsBucket}/${DefaultSampleName}/bam/sorted.bam.stats"
         WorkingDir: "/scratch"
       ContainerProperties:
-        Image: !Sub "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/samtools-stats"
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/samtools-stats"
         Vcpus: 4
         Memory: 40000
         JobRoleArn:

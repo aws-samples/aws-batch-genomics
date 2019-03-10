@@ -14,7 +14,7 @@ def download_folder(s3_path, directory_to_download):
     :param directory_to_download: path to download the directory to
     :return: directory that was downloaded
     """
-    cmd = 'aws s3 cp --recursive %s %s' % (s3_path, directory_to_download)
+    cmd = 'aws s3 cp %s %s --recursive' % (s3_path, directory_to_download)
 
     subprocess.check_call(shlex.split(cmd))
 
@@ -47,7 +47,7 @@ def upload_folder(s3_path, local_folder_path, sse=True):
     :param local_folder_path: local folder path
     :param sse: boolean whether to enable server-side encryption
     """
-    cmd = 'aws s3 cp --recursive %s %s' % (local_folder_path, s3_path)
+    cmd = 'aws s3 cp %s %s --recursive' % (local_folder_path, s3_path)
 
     if sse:
         cmd += ' --sse'
