@@ -1,3 +1,7 @@
+This solution has been replaced by the AWS Solution for secondary analysis:
+
+https://aws.amazon.com/solutions/implementations/genomics-secondary-analysis-using-aws-step-functions-and-aws-batch/
+
 # Genomics Research on AWS
 
 This project demonstrates how to run a large-scale, genomics secondary-analysis pipeline on [AWS](https://aws.amazon.com/) using [AWS Step Functions](https://aws.amazon.com/step-functions/) and [AWS Batch](https://aws.amazon.com/batch/).  You can learn more about how we used the new AWS Step Functions integration with AWS Batch in our blog post, [Building Simpler Genomics Workflows on AWS Step Functions](https://aws.amazon.com/blogs/compute/building-simpler-genomics-workflows-on-aws-step-functions/). 
